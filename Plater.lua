@@ -10815,7 +10815,7 @@ end
 	local errorContext = nil
 	local prevErrors = {}
 	local ErrorHandler = function(errorMessage)
-		errorContext = errorContext or "Plater error: "
+		errorContext = errorContext or ("Plater " .. L["ERROR"] .. ": ")
 		local msg = errorContext .. errorMessage
 		--throttle error messages a bit...
 		local lastTime = prevErrors[msg]

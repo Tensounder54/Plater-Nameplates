@@ -225,11 +225,11 @@ function Plater.OpenOptionsPanel(pageNumber, bIgnoreLazyLoad)
 	local profile = Plater.db.profile
 	
 	--local CVarDesc = "\n\n|cFFFF7700[*]|r |cFFa0a0a0CVar, not saved within Plater profile and is a Per-Character setting.|r"
-	local CVarDesc = "\n\n|cFFFF7700[*]|r |cFFa0a0a0CVar, saved within Plater profile and restored when loading the profile.|r"
-	local CVarIcon = "|cFFFF7700*|r"
-	local CVarNeedReload = "\n\n|cFFFF2200[*]|r |cFFa0a0a0A /reload may be required to take effect.|r"
-	local ImportantText = "|cFFFFFF00 Important |r: "
-	local SliderRightClickDesc = "\n\n" .. ImportantText .. "right click to type the value."
+	local CVarDesc = "\n\n" .. L["CVAR_INFORMATION"]
+	local CVarIcon = "|cFFFF7700*|r" -- TODO: Does this need translation? I assume not but will ask.
+	local CVarNeedReload = L["CVAR_NEED_RELOAD"]
+	local ImportantText = "|cFFFFFF00 " .. L["IMPORTANT"] .. " |r: "
+	local SliderRightClickDesc = "\n\n" .. ImportantText .. L["SLIDER_RIGHT_CLICK_DESC"]
 	
 	local hookList = {
 		---@param tabContainer df_tabcontainer
@@ -267,7 +267,7 @@ function Plater.OpenOptionsPanel(pageNumber, bIgnoreLazyLoad)
 	}
 
 	-- mainFrame � um frame vazio para sustentrar todos os demais frames, este frame sempre ser� mostrado
-	local mainFrame = DF:CreateTabContainer (f, "Plater Options", "PlaterOptionsPanelContainer", 
+	local mainFrame = DF:CreateTabContainer (f, ("Plater " .. L["OPTIONS"]), "PlaterOptionsPanelContainer", 
 	{
 		--when chaging these indexes also need to change the function f.CopySettings
 		{name = "FrontPage",				text = "OPTIONS_TABNAME_GENERALSETTINGS"},
@@ -297,9 +297,9 @@ function Plater.OpenOptionsPanel(pageNumber, bIgnoreLazyLoad)
 		{name = "AdvancedConfig",			text = "OPTIONS_TABNAME_ADVANCED"},
 		{name = "resourceFrame",			text = "OPTIONS_TABNAME_COMBOPOINTS"},
 
-		{name = "WagoIo", text = "Wago Imports"}, --wago_imports --localize-me
+		{name = "WagoIo", text = "Wago " .. L["OPTIONS_TABNAME_IMPORTS"]},
 		{name = "SearchFrame", text = "OPTIONS_TABNAME_SEARCH"},
-		{name = "PluginsFrame", text = "Plugins"}, --localize-me
+		{name = "PluginsFrame", text = L["OPTIONS_TABNAME_PLUGINS"]}, --localize-me
 		
 	}, 
 	frame_options, hookList, languageInfo)
@@ -446,7 +446,7 @@ function Plater.OpenOptionsPanel(pageNumber, bIgnoreLazyLoad)
 	statusBar:SetAlpha (0.9)
 	statusBar:SetFrameLevel (f:GetFrameLevel()+10)
 	
-	DF:BuildStatusbarAuthorInfo (statusBar, "Plater is Maintained by ", "Cont1nuity & Terciob")
+	DF:BuildStatusbarAuthorInfo (statusBar, "Plater " .. L["OPTIONS_IS_MAINTAINED_BY"] .. " ", "Cont1nuity & Terciob")
 	
 	--if (DF.IsDragonflight()) then
 	local bottomGradient = DF:CreateTexture(f, {gradient = "vertical", fromColor = {0, 0, 0, 0.6}, toColor = "transparent"}, 1, 100, "artwork", {0, 1, 0, 1}, "bottomGradient")
@@ -506,6 +506,17 @@ function Plater.OpenOptionsPanel(pageNumber, bIgnoreLazyLoad)
 		local languageSelectorDropdown = DF.Language.CreateLanguageSelector(addonId, OTTFrame, onLanguageChangedCallback, currentLanguage)
 		languageSelectorDropdown:SetPoint("topright", 0, 0)
 	--end of languages
+
+	function f.SplitString (inputString, seperationPoint)
+        if seperationPoint == nil then
+			seperationPoint = "%s"
+        end
+        local blankDictionary={}
+        for subString in string.gmatch(inputString, "([^"..seperationPoint.."]+)") do
+            table.insert(blankDictionary, subString)
+        end
+        return blankDictionary
+	end
 
 	--> on profile change
 	function f.RefreshOptionsFrame()
@@ -715,21 +726,22 @@ function Plater.OpenOptionsPanel(pageNumber, bIgnoreLazyLoad)
 											if id and impProfID == id then
 												existingProfileName = pName
 												break
-											end									
+											end	
 										end
 									end
 								
-									wagoInfoText = wagoInfoText .. "Extracted the following wago information from the profile data:\n"
-									wagoInfoText = wagoInfoText .. "  Local Profile Name: " .. (wagoProfile.profile_name or "N/A") .. "\n"
-									wagoInfoText = wagoInfoText .. "  Wago-Revision: " .. (wagoProfile.version or "-") .. "\n"
-									wagoInfoText = wagoInfoText .. "  Wago-Version: " .. (wagoProfile.semver or "-") .. "\n"
+									wagoInfoText = wagoInfoText .. L["WAGO_INFO_TEXT"] .. ":\n"
+									wagoInfoText = wagoInfoText .. "  " .. L["WAGO_INFO_LOCAL_PROFILE_NAME"] .. ": " .. (wagoProfile.profile_name or "-") .. "\n"
+									wagoInfoText = wagoInfoText .. "  Wago-" .. L["WAGO_INFO_REVISION"] .. ": " .. (wagoProfile.version or "-") .. "\n"
+									wagoInfoText = wagoInfoText .. "  Wago-" .. L["WAGO_INFO_VERSION"] .. ": " .. (wagoProfile.semver or "-") .. "\n"
 									wagoInfoText = wagoInfoText .. "  Wago-URL: " .. (wagoProfile.url and (wagoProfile.url .. "\n") or "")
-									wagoInfoText = wagoInfoText .. (existingProfileName and ("\nThis profile already exists as: '" .. existingProfileName .. "' in your profiles.\n") or "")
+									local wagoInfoText
+									wagoInfoText = wagoInfoText .. (existingProfileName and ("\n" .. L["WAGO_INFO_EXISTING_PROFILE_FIRST"] .. ": '" .. existingProfileName .. "' " .. L["WAGO_INFO_EXISTING_PROFILE_SECOND"] .. ".\n") or "")
 								else
-									wagoInfoText = "This profile does not contain any wago.io information.\n"
+									wagoInfoText = L["WAGO_INFO_ELSE"] .. "\n"
 								end
 								
-								wagoInfoText = wagoInfoText .. "\nYou may change the name below and click on '".. L["OPTIONS_OKAY"] .. "' to import the profile."
+								wagoInfoText = wagoInfoText .. L["WAGO_INFO_ADDENDUM_FIRST"] .. L["OPTIONS_OKAY"] .. L["WAGO_INFO_ADDENDUM_SECOND"]
 								
 								editbox:SetText (wagoInfoText)
 								profilesFrame.ImportStringField.importDataText = paste
@@ -748,7 +760,7 @@ function Plater.OpenOptionsPanel(pageNumber, bIgnoreLazyLoad)
 								end
 							end
 						else
-							editbox:SetText("Could not decompress the data. The text pasted does not appear to be a serialized Plater profile.\nTry copying the import string again.")
+							editbox:SetText(L["WAGO_DECOMPRESSTION_ERROR"])
 						end
 						
 						editbox:ClearFocus()
@@ -769,7 +781,7 @@ function Plater.OpenOptionsPanel(pageNumber, bIgnoreLazyLoad)
 				profilesFrame.ImportStringField:Show()
 				
 				C_Timer.After (.2, function()
-					profilesFrame.ImportStringField:SetText ("<Paste import string here>")
+					profilesFrame.ImportStringField:SetText (L["WAGO_IMPORT_GENERIC"])
 					profilesFrame.ImportStringField:SetFocus (true)
 				end)
 				
@@ -1085,11 +1097,11 @@ function Plater.OpenOptionsPanel(pageNumber, bIgnoreLazyLoad)
 			
 			function profilesFrame.IgnoreUpdateProfile()
 				if not Plater.db.profile.ignoreWagoUpdate then
-					profilesFrame.ignoreProfileUpdateButton.button.text:SetText ("Don't ignore Profile Update")
+					profilesFrame.ignoreProfileUpdateButton.button.text:SetText (L["IGNORE_PROFILE_OFF"])
 					Plater.db.profile.ignoreWagoUpdate = true
 					checkProfilesUpdateEnabled()
 				else
-					profilesFrame.ignoreProfileUpdateButton.button.text:SetText ("Ignore Profile Update")
+					profilesFrame.ignoreProfileUpdateButton.button.text:SetText (L["IGNORE_PROFILE_ON"])
 					Plater.db.profile.ignoreWagoUpdate = nil
 					checkProfilesUpdateEnabled()
 				end
@@ -1101,11 +1113,11 @@ function Plater.OpenOptionsPanel(pageNumber, bIgnoreLazyLoad)
 				local companionVersion = wago_update and tonumber(wago_update.wagoVersion) or nil
 				if (Plater.db.profile.skipWagoUpdate and wago_update) or hasProfileUpdate then
 					if Plater.db.profile.skipWagoUpdate or companionVersion and Plater.db.profile.skipWagoUpdate == companionVersion then
-						profilesFrame.skipProfileUpdateButton.button.text:SetText ("Skip this version")
+						profilesFrame.skipProfileUpdateButton.button.text:SetText (L["SKIP_PROFILE_ON"])
 						Plater.db.profile.skipWagoUpdate = nil
 						checkProfilesUpdateEnabled()
 					else
-						profilesFrame.skipProfileUpdateButton.button.text:SetText ("Don't skip this version")
+						profilesFrame.skipProfileUpdateButton.button.text:SetText (L["SKIP_PROFILE_OFF"])
 						Plater.db.profile.skipWagoUpdate = companionVersion
 						checkProfilesUpdateEnabled()
 					end
@@ -1144,13 +1156,13 @@ function Plater.OpenOptionsPanel(pageNumber, bIgnoreLazyLoad)
 				moreProfilesTextEntry:HighlightText()
 			end)
 			
-			local profileInfoLabel = DF:CreateLabel (profilesFrame, "Current Profile Info" .. ":", DF:GetTemplate ("font", "PLATER_BUTTON"))
+			local profileInfoLabel = DF:CreateLabel (profilesFrame, L["CURRNET_PROFILE_INFO"] .. ":", DF:GetTemplate ("font", "PLATER_BUTTON"))
 			profileInfoLabel:SetPoint ("topleft", moreProfilesTextEntry, "bottomleft", 0, -30)
 			
 			local profileInfoText = ""
-			profileInfoText = profileInfoText .. "Name: " .. Plater.db:GetCurrentProfile() .. "\n\n"
-			profileInfoText = profileInfoText .. "Profile-Revision: " .. (Plater.db.profile.version or "-") .. "\n"
-			profileInfoText = profileInfoText .. "Profile-Version: " .. (Plater.db.profile.semver or "-") .. "\n\n"
+			profileInfoText = profileInfoText .. L["PROFILE_INFO_TEXT_NAME"] .. ": " .. Plater.db:GetCurrentProfile() .. "\n\n"
+			profileInfoText = profileInfoText .. "Profile-" .. L["PROFILE_INFO_TEXT_REVISION"] .. ": " .. (Plater.db.profile.version or "-") .. "\n"
+			profileInfoText = profileInfoText .. "Profile-" .. L["PROFILE_INFO_TEXT_VERSION"] .. ": " .. (Plater.db.profile.semver or "-") .. "\n\n"
 			profileInfoText = profileInfoText .. (Plater.db.profile.url or "")
 			
 			local profileInfo = DF:CreateLabel(profilesFrame, profileInfoText, 10, "orange")
@@ -1160,17 +1172,17 @@ function Plater.OpenOptionsPanel(pageNumber, bIgnoreLazyLoad)
 			profileInfo.align = "left"
 			profileInfo:SetPoint("topleft", profileInfoLabel, "bottomleft", 0, -2)
 			
-			local copyWagoURLButton = DF:CreateButton (profilesFrame, profilesFrame.CopyWagoUrl, 160, 20, "Copy Wago URL", -1, nil, nil, "CopyWagoUrlButton", nil, nil, DF:GetTemplate ("button", "OPTIONS_BUTTON_TEMPLATE"), DF:GetTemplate ("font", "PLATER_BUTTON"))
+			local copyWagoURLButton = DF:CreateButton (profilesFrame, profilesFrame.CopyWagoUrl, 160, 20, (L["COPY_VERB_FOR_WAGO_URL"] .. " Wago URL"), -1, nil, nil, "CopyWagoUrlButton", nil, nil, DF:GetTemplate ("button", "OPTIONS_BUTTON_TEMPLATE"), DF:GetTemplate ("font", "PLATER_BUTTON"))
 			copyWagoURLButton:SetPoint ("topleft", profileInfo, "bottomleft", 0, -2)
 			if not Plater.db.profile.url then
 				copyWagoURLButton:Disable()
 			end
 			
-			local updateProfileLabel = DF:CreateLabel (profilesFrame, "Update from wago.io" .. ":", DF:GetTemplate ("font", "PLATER_BUTTON"))
+			local updateProfileLabel = DF:CreateLabel (profilesFrame, (L["UPDATE_FROM_WAGO"] .. " wago.io:"), DF:GetTemplate ("font", "PLATER_BUTTON"))
 			updateProfileLabel:SetPoint ("topleft", copyWagoURLButton, "bottomleft", 0, -30)
 			
 			--import profile button
-			local updateProfileButton = DF:CreateButton (profilesFrame, profilesFrame.UpdateProfile, 160, 20, "Update Profile", -1, nil, nil, "WagoUpdateProfileButton", nil, nil, DF:GetTemplate ("button", "OPTIONS_BUTTON_TEMPLATE"), DF:GetTemplate ("font", "PLATER_BUTTON"))
+			local updateProfileButton = DF:CreateButton (profilesFrame, profilesFrame.UpdateProfile, 160, 20, L["UPDATE_PROFILE"], -1, nil, nil, "WagoUpdateProfileButton", nil, nil, DF:GetTemplate ("button", "OPTIONS_BUTTON_TEMPLATE"), DF:GetTemplate ("font", "PLATER_BUTTON"))
 			updateProfileButton:SetPoint ("topleft", updateProfileLabel, "bottomleft", 0, -2)
 			profilesFrame.updateProfileButton = updateProfileButton
 			
@@ -1181,16 +1193,16 @@ function Plater.OpenOptionsPanel(pageNumber, bIgnoreLazyLoad)
 			updateProfileButton.updateIcon = updateIcon
 			
 			--ignore profile update button
-			local ignoreProfileUpdateButton = DF:CreateButton (profilesFrame, profilesFrame.IgnoreUpdateProfile, 160, 20, "Ignore Profile Update", -1, nil, nil, "WagoIgnoreUpdateProfileButton", nil, nil, DF:GetTemplate ("button", "OPTIONS_BUTTON_TEMPLATE"), DF:GetTemplate ("font", "PLATER_BUTTON"))
+			local ignoreProfileUpdateButton = DF:CreateButton (profilesFrame, profilesFrame.IgnoreUpdateProfile, 160, 20, L["IGNORE_PROFILE_UPDATE"], -1, nil, nil, "WagoIgnoreUpdateProfileButton", nil, nil, DF:GetTemplate ("button", "OPTIONS_BUTTON_TEMPLATE"), DF:GetTemplate ("font", "PLATER_BUTTON"))
 			ignoreProfileUpdateButton:SetPoint ("topleft", updateProfileButton, "bottomleft", 0, -2)
 			profilesFrame.ignoreProfileUpdateButton = ignoreProfileUpdateButton
 			
 			--ignore profile update button
-			local skipProfileUpdateButton = DF:CreateButton (profilesFrame, profilesFrame.SkipUpdateProfile, 160, 20, "Skip this version", -1, nil, nil, "WagoSkipUpdateProfileButton", nil, nil, DF:GetTemplate ("button", "OPTIONS_BUTTON_TEMPLATE"), DF:GetTemplate ("font", "PLATER_BUTTON"))
+			local skipProfileUpdateButton = DF:CreateButton (profilesFrame, profilesFrame.SkipUpdateProfile, 160, 20, L["SKIP_THIS_VERSION"], -1, nil, nil, "WagoSkipUpdateProfileButton", nil, nil, DF:GetTemplate ("button", "OPTIONS_BUTTON_TEMPLATE"), DF:GetTemplate ("font", "PLATER_BUTTON"))
 			skipProfileUpdateButton:SetPoint ("topleft", ignoreProfileUpdateButton, "bottomleft", 0, -2)
 			profilesFrame.skipProfileUpdateButton = skipProfileUpdateButton
 			
-			local wagoInfoLabel = DF:CreateLabel (profilesFrame, "Wago ProfileInfo" .. ":", DF:GetTemplate ("font", "PLATER_BUTTON"))
+			local wagoInfoLabel = DF:CreateLabel (profilesFrame, "Wago " .. L["WAGO_PROFILE_INFO__PROFILE"] .. L["WAGO_PROFILE_INFO__INFO"] .. ":", DF:GetTemplate ("font", "PLATER_BUTTON"))
 			wagoInfoLabel:SetPoint ("topleft", skipProfileUpdateButton, "bottomleft", 0, -10)
 			
 			local wagoInfo = DF:CreateLabel(profilesFrame, "", 10, "orange")
@@ -1213,8 +1225,8 @@ function Plater.OpenOptionsPanel(pageNumber, bIgnoreLazyLoad)
 				
 						local wagoInfoText = ""
 						wagoInfoText = wagoInfoText .. "Name: " .. update.name .. "\n\n"
-						wagoInfoText = wagoInfoText .. "Wago-Revision: " .. (wagoProfile.version or "-") .. "\n"
-						wagoInfoText = wagoInfoText .. "Wago-Version: " .. (wagoProfile.semver or "-") .. "\n\n"
+						wagoInfoText = wagoInfoText .. "Wago-" .. L["WAGO_INFO_REVISION"] .. ": " .. (wagoProfile.version or "-") .. "\n"
+						wagoInfoText = wagoInfoText .. "Wago-" .. L["WAGO_INFO_VERSION"] .. ": " .. (wagoProfile.semver or "-") .. "\n\n"
 						wagoInfoText = wagoInfoText .. (wagoProfile.url or "")
 						
 						wagoInfo.label:SetText (wagoInfoText)
@@ -1226,14 +1238,14 @@ function Plater.OpenOptionsPanel(pageNumber, bIgnoreLazyLoad)
 			
 			if (Plater.db.profile.url) then
 				if Plater.db.profile.ignoreWagoUpdate then
-					ignoreProfileUpdateButton.button.text:SetText ("Don't ignore Profile Update")
+					ignoreProfileUpdateButton.button.text:SetText (L["IGNORE_PROFILE_OFF"])
 				end
 				
 				local wago_update = Plater.GetWagoUpdateDataFromCompanion(Plater.db.profile)
 				local companionVersion = wago_update and tonumber(wago_update.wagoVersion) or nil
 				if (Plater.db.profile.skipWagoUpdate and wago_update) or hasProfileUpdate then
 					if Plater.db.profile.skipWagoUpdate or companionVersion and Plater.db.profile.skipWagoUpdate == companionVersion then
-						skipProfileUpdateButton.button.text:SetText ("Don't skip this version")
+						skipProfileUpdateButton.button.text:SetText (L["SKIP_PROFILE_OFF"])
 					end
 				else
 					skipProfileUpdateButton:Disable()
@@ -1340,8 +1352,8 @@ function Plater.OpenOptionsPanel(pageNumber, bIgnoreLazyLoad)
 	local textures = LibSharedMedia:HashTable ("statusbar")
 
 	--outline table
-	local outline_modes = {"NONE", "MONOCHROME", "OUTLINE", "THICKOUTLINE", "MONOCHROME, OUTLINE", "MONOCHROME, THICKOUTLINE"}
-	local outline_modes_names = {"None", "Monochrome", "Outline", "Thick Outline", "Monochrome Outline", "Monochrome Thick Outline"}
+	local outline_modes = {L["OUTLINE_MODES_NONE"], L["OUTLINE_MODES_MONOCHROME"], L["OUTLINE_MODES_OUTLINE"], L["OUTLINE_MODES_THICKOUTLINE"], L["OUTLINE_MODES_MONOCHROME_OUTLINE"], L["OUTLINE_MODES_MONOCHROME_THICKOUTLINE"]}
+	local outline_modes_names = {L["OUTLINE_MODES_NAMES_NONE"], L["OUTLINE_MODES_NAMES_MONOCHROME"], L["OUTLINE_MODES_NAMES_OUTLINE"], L["OUTLINE_MODES_NAMES_THICKOUTLINE"], L["OUTLINE_MODES_NAMES_MONOCHROME_OUTLINE"], L["OUTLINE_MODES_NAMES_MONOCHROME_THICKOUTLINE"]}
 	local build_outline_modes_table = function (actorType, member)
 		local t = {}
 		for i = 1, #outline_modes do
@@ -1464,7 +1476,7 @@ function Plater.OpenOptionsPanel(pageNumber, bIgnoreLazyLoad)
 	end
 	local target_selection_texture_selected_options = {}
 	for index, texturePath in ipairs (Plater.TargetHighlights) do
-		target_selection_texture_selected_options [#target_selection_texture_selected_options + 1] = {value = texturePath, label = "Highlight " .. index, statusbar = texturePath, onclick = target_selection_texture_selected}
+		target_selection_texture_selected_options [#target_selection_texture_selected_options + 1] = {value = texturePath, label = L["TARGET_HIGHLIGHTS"] .. index, statusbar = texturePath, onclick = target_selection_texture_selected}
 	end
 	--
 	local cooldown_edge_texture_selected = function (self, capsule, value)
@@ -1474,7 +1486,7 @@ function Plater.OpenOptionsPanel(pageNumber, bIgnoreLazyLoad)
 	end
 	local cooldown_edge_texture_selected_options = {}
 	for index, texturePath in ipairs (Plater.CooldownEdgeTextures) do
-		cooldown_edge_texture_selected_options [#cooldown_edge_texture_selected_options + 1] = {value = texturePath, label = "Texture " .. index, statusbar = texturePath, onclick = cooldown_edge_texture_selected}
+		cooldown_edge_texture_selected_options [#cooldown_edge_texture_selected_options + 1] = {value = texturePath, label = L["TARGET_TEXTURE"] .. index, statusbar = texturePath, onclick = cooldown_edge_texture_selected}
 	end
 	--
 	local extra_icon_cooldown_edge_texture_selected = function (self, capsule, value)
@@ -1484,7 +1496,7 @@ function Plater.OpenOptionsPanel(pageNumber, bIgnoreLazyLoad)
 	end
 	local extra_icon_cooldown_edge_texture_selected_options = {}
 	for index, texturePath in ipairs (Plater.CooldownEdgeTextures) do
-		extra_icon_cooldown_edge_texture_selected_options [#extra_icon_cooldown_edge_texture_selected_options + 1] = {value = texturePath, label = "Texture " .. index, statusbar = texturePath, onclick = extra_icon_cooldown_edge_texture_selected}
+		extra_icon_cooldown_edge_texture_selected_options [#extra_icon_cooldown_edge_texture_selected_options + 1] = {value = texturePath, label = L["TARGET_TEXTURE"] .. index, statusbar = texturePath, onclick = extra_icon_cooldown_edge_texture_selected}
 	end
 	--
 	local cast_spark_texture_selected = function (self, capsule, value)
@@ -1495,7 +1507,7 @@ function Plater.OpenOptionsPanel(pageNumber, bIgnoreLazyLoad)
 	for index, texturePath in ipairs (Plater.SparkTextures) do
 		cast_spark_texture_selected_options [#cast_spark_texture_selected_options + 1] = {
 			value = texturePath,
-			label = "Texture " .. index,
+			label = L["TARGET_TEXTURE"] .. index,
 			onclick = cast_spark_texture_selected,
 			centerTexture = texturePath,
 			statusbar = dropdownStatusBarTexture,
@@ -1518,9 +1530,9 @@ function Plater.ChangeNameplateAnchor (_, _, value)
 	end
 end
 local nameplate_anchor_options = {
-	{label = "Head", value = 0, onclick = Plater.ChangeNameplateAnchor, desc = "All nameplates are placed above the character."},
-	{label = "Head/Feet", value = 1, onclick = Plater.ChangeNameplateAnchor, desc = "Friendly and neutral has the nameplate on their head, enemies below the feet."},
-	{label = "Feet", value = 2, onclick = Plater.ChangeNameplateAnchor, desc = "All nameplates are placed below the character."},
+	{label = L["PLACE_NAMEPLATE_AT_HEAD_NAME"], value = 0, onclick = Plater.ChangeNameplateAnchor, desc = L["PLACE_NAMEPLATE_AT_HEAD_DESC"]},
+	{label = L["PLACE_NAMEPLATE_MIXED_NAME"], value = 1, onclick = Plater.ChangeNameplateAnchor, desc = L["PLACE_NAMEPLATE_MIXED_DESC"]},
+	{label = L["PLACE_NAMEPLATE_AT_FEET_NAME"], value = 2, onclick = Plater.ChangeNameplateAnchor, desc = L["PLACE_NAMEPLATE_AT_FEET_DESC"]},
 }
 
 local interface_options = {
@@ -1536,7 +1548,7 @@ in_combat_background:SetPoint ("topleft", interface_title, "bottomleft", -5, 5)
 in_combat_background:SetSize(275, 288)
 in_combat_background:Hide()
 
-local in_combat_label = Plater:CreateLabel (frontPageFrame, "you are in combat", 24, "silver")
+local in_combat_label = Plater:CreateLabel (frontPageFrame, L["IN_COMBAT_LABEL"], 24, "silver")
 in_combat_label:SetPoint ("right", in_combat_background, "right", -10, 10)
 in_combat_label:Hide()
 
@@ -1591,17 +1603,17 @@ function frontPageFrame.OpenNewsWindow()
 	Plater.db.profile.last_news_time = time()
 	
 	local numNews = DF:GetNumNews (Plater.GetChangelogTable(), Plater.db.profile.last_news_time)
-	frontPageFrame.NewsButton:SetText ("Open Change Log")
+	frontPageFrame.NewsButton:SetText (L["OPEN_CHANGE_LOG"])
 
 end
 
-local openNewsButton = DF:CreateButton (frontPageFrame, frontPageFrame.OpenNewsWindow, 160, 20, "Open Change Log", -1, nil, nil, nil, nil, nil, DF:GetTemplate ("button", "OPTIONS_BUTTON_TEMPLATE"), DF:GetTemplate ("font", "PLATER_BUTTON"))
+local openNewsButton = DF:CreateButton (frontPageFrame, frontPageFrame.OpenNewsWindow, 160, 20, L["OPEN_CHANGE_LOG"], -1, nil, nil, nil, nil, nil, DF:GetTemplate ("button", "OPTIONS_BUTTON_TEMPLATE"), DF:GetTemplate ("font", "PLATER_BUTTON"))
 openNewsButton:SetPoint ("topleft", frontPageFrame, "topleft", 10, -80)
 frontPageFrame.NewsButton = openNewsButton
 
 local numNews = DF:GetNumNews (Plater.GetChangelogTable(), Plater.db.profile.last_news_time)
 if (numNews > 0) then
-	frontPageFrame.NewsButton:SetText ("Open Change Log (|cFFFFFF00" .. numNews .."|r)")
+	frontPageFrame.NewsButton:SetText (L["OPEN_CHANGE_LOG"] .. " (|cFFFFFF00" .. numNews .."|r)")
 end
 
 
@@ -1636,22 +1648,22 @@ function Plater.CreateGoToTabFrame(parent, text, index)
 	return goToTab
 end
 
-local goToTabFrame1 = Plater.CreateGoToTabFrame(frontPageFrame, "Go to 'Enemy Npc' tab to setup health and castbar size.", 13)
+local goToTabFrame1 = Plater.CreateGoToTabFrame(frontPageFrame, L["FRONT_PAGE_FRAME_GO_TO_TEXT"], 13)
 goToTabFrame1:SetPoint("bottomright", frontPageFrame, "bottomright", -24, 22)
 
-local goToTabFrame2 = Plater.CreateGoToTabFrame(enemyNPCsFrame, "Go to 'Threat / Aggro' tab to setup colors.", 2)
+local goToTabFrame2 = Plater.CreateGoToTabFrame(enemyNPCsFrame, L["NPC_FRAME_GO_TO_TEXT"], 2)
 goToTabFrame2:SetPoint("bottomright", enemyNPCsFrame, "bottomright", -24, 22)
 
-local goToTabFrame3 = Plater.CreateGoToTabFrame(threatFrame, "Go to 'Target' tab to choose how the nameplate looks like when the unit is your target.", 3)
+local goToTabFrame3 = Plater.CreateGoToTabFrame(threatFrame, L["THREAT_FRAME_GO_TO_TEXT"], 3)
 goToTabFrame3:SetPoint("bottomright", threatFrame, "bottomright", -24, 22)
 
-local goToTabFrame4 = Plater.CreateGoToTabFrame(targetFrame, "Go to 'Buff Settings' tab to setup the auras above the nameplate.", 9)
+local goToTabFrame4 = Plater.CreateGoToTabFrame(targetFrame, L["TARGET_FRAME_GO_TO_TEXT"], 9)
 goToTabFrame4:SetPoint("bottomright", targetFrame, "bottomright", -24, 22)
 
 -------------------------------------------------------------------------------
 -- painel para configurar debuffs e buffs
 
-
+-- TODO: Not sure how to handel this...
 local build_number_format_options = function()
 	local number_format_options = {"Western (1K - 1KK)"}
 	local number_format_options_config = {"western", "eastasia"}
@@ -1682,7 +1694,7 @@ local build_number_format_options = function()
 	return t
 end
 
-local grow_direction_names = {"Left", "Center", "Right"}
+local grow_direction_names = {L["GROW_DIRECTION_NAMES_LEFT"], L["GROW_DIRECTION_NAMES_CENTER"], L["GROW_DIRECTION_NAMES_RIGHT"]}
 local build_grow_direction_options = function (memberName)
 	local t = {}
 	for i = 1, #grow_direction_names do
@@ -1731,7 +1743,7 @@ local debuff_options = {
 	
 	{type = "blank"},
 	
-	{type = "label", get = function() return "General Settings:" end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},	
+	{type = "label", get = function() return L["GENERAL_SETTINGS"] end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},	
 	{
 		type = "toggle",
 		boxfirst = true,
@@ -1871,7 +1883,7 @@ local debuff_options = {
 	},
 	
 	{type = "blank"},
-	{type = "label", get = function() return "Aura Size (Frame 1):" end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
+	{type = "label", get = function() return L["FRAME_ONE_AURA_SIZE"] end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
 	
 	{
 		type = "range",
@@ -1905,7 +1917,7 @@ local debuff_options = {
 	},
 	
 	{type = "blank"},
-	{type = "label", get = function() return "Aura Size (Frame 2):" end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
+	{type = "label", get = function() return L["FRAME_TWO_AURA_SIZE"] end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
 	
 	{
 		type = "range",
@@ -2089,15 +2101,15 @@ local debuff_options = {
 	},
 	
 	{type = "breakline"},
-	{type = "label", get = function() return "Aura Frame 1:" end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
+	{type = "label", get = function() return L["AURA_FRAME_ONE"] end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
 	
 	--> grow direction
 	{
 		type = "select",
 		get = function() return Plater.db.profile.aura_grow_direction end,
 		values = function() return build_grow_direction_options ("aura_grow_direction") end,
-		name = "Grow Direction",
-		desc = "To which side aura icons should grow.\n\n" .. ImportantText .. "debuffs are added first, buffs after.",
+		name = L["AURA_GROW_DIRECTION_NAME"],
+		desc = L["AURA_GROW_DIRECTION_DESC_FIRST"] .. ImportantText .. L["AURA_GROW_DIRECTION_DESC_SECOND"],
 	},
 	
 	{
@@ -2105,7 +2117,7 @@ local debuff_options = {
 		get = function() return Plater.db.profile.aura_frame1_anchor.side end,
 		values = function() return build_anchor_side_table (nil, "aura_frame1_anchor") end,
 		name = "OPTIONS_ANCHOR",
-		desc = "Which side of the nameplate this aura frame is attached to.",
+		desc = L["OPTIONS_ANCHOR_DESC_ONE"],
 	},
 	{
 		type = "range",
@@ -2141,7 +2153,7 @@ local debuff_options = {
 	},
 	
 	{type = "blank"},
-	{type = "label", get = function() return "Aura Frame 2:" end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
+	{type = "label", get = function() return L["AURA_FRAME_TWO"] end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
 	
 	{
 		type = "toggle",
@@ -2153,15 +2165,15 @@ local debuff_options = {
 			Plater.UpdateAllPlates()
 		end,
 		name = "OPTIONS_ENABLED",
-		desc = "When enabled auras are separated: Buffs are placed on this second frame, Debuffs on the first.",
+		desc = L["OPTIONS_ENABLED_DESC"],
 	},
 	--> grow direction
 	{
 		type = "select",
 		get = function() return Plater.db.profile.aura2_grow_direction end,
 		values = function() return build_grow_direction_options ("aura2_grow_direction") end,
-		name = "Grow Direction",
-		desc = "To which side aura icons should grow.",
+		name = L["OPTIONS_GROW_DIRECTION"],
+		desc = L["OPTIONS_GROW_DIRECTION_DESC"],
 	},
 	--> offset
 	{
@@ -2169,7 +2181,7 @@ local debuff_options = {
 		get = function() return Plater.db.profile.aura_frame2_anchor.side end,
 		values = function() return build_anchor_side_table (nil, "aura_frame2_anchor") end,
 		name = "OPTIONS_ANCHOR",
-		desc = "Which side of the nameplate this aura frame is attached to.",
+		desc = L["OPTIONS_ANCHOR_DESC_ONE"],
 	},
 	{
 		type = "range",
@@ -2206,7 +2218,7 @@ local debuff_options = {
 	
 	{type = "blank"},
 
-	{type = "label", get = function() return "Stack Counter:" end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
+	{type = "label", get = function() return L["OPTIONS_STACK_COUNTER"] end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
 
 	{
 		type = "select",
@@ -2227,7 +2239,7 @@ local debuff_options = {
 		max = 24,
 		step = 1,
 		name = "OPTIONS_SIZE",
-		desc = "Size",
+		desc = "OPTIONS_SIZE", -- In this case as with a few others, the description matches the name.
 	},
 	
 	--text outline options
@@ -2276,7 +2288,7 @@ local debuff_options = {
 		get = function() return Plater.db.profile.aura_stack_anchor.side end,
 		values = function() return build_anchor_side_table (nil, "aura_stack_anchor") end,
 		name = "OPTIONS_ANCHOR",
-		desc = "Which side of the buff icon the stack counter should attach to.",
+		desc = L["OPTIONS_ANCHOR_DESC_TWO"],
 	},
 	{
 		type = "range",
@@ -2453,7 +2465,7 @@ local debuff_options = {
 	
 	{type = "breakline"},
 	
-	{type = "label", get = function() return "Auras per Row:" end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
+	{type = "label", get = function() return L["OPTIONS_AURAS_PER_ROW"] end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
 	{
 		type = "toggle",
 		boxfirst = true,
@@ -2464,8 +2476,8 @@ local debuff_options = {
 			Plater.RefreshAuras()
 			Plater.UpdateAllPlates()
 		end,
-		name = "Automatic",
-		desc = "When enabled auras are split into rows automatically according to healthbar width when growing left/right. Mods can overwrite the amount.",
+		name = L["OPTIONS_AURAS_PER_ROW_AUTO_NAME"],
+		desc = L["OPTIONS_AURAS_PER_ROW_AUTO_DESC"],
 	},
 	{
 		type = "range",
@@ -2479,8 +2491,8 @@ local debuff_options = {
 		min = 1,
 		max = 10,
 		step = 1,
-		name = "Auras per Row 1",
-		desc = "Auras per Row if auto-mode is disabled for Aura Frame 1.",
+		name = L["OPTIONS_AURAS_PER_ROW_NAME"] .. " 1",
+		desc = L["OPTIONS_AURAS_PER_ROW_DESC"] .. " 1.",
 	},
 		{
 		type = "range",
@@ -2494,12 +2506,12 @@ local debuff_options = {
 		min = 1,
 		max = 10,
 		step = 1,
-		name = "Auras per Row 2",
-		desc = "Auras per Row if auto-mode is disabled for Aura Frame 2.",
+		name = L["OPTIONS_AURAS_PER_ROW_NAME"] .. " 2",
+		desc = L["OPTIONS_AURAS_PER_ROW_DESC"] .. " 2.",
 	},
 	
 	{type = "break"},
-	{type = "label", get = function() return "Aura Timer:" end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
+	{type = "label", get = function() return L["OPTIONS_AURA_TIMER"] end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
 	
 	{
 		type = "toggle",
@@ -2511,7 +2523,7 @@ local debuff_options = {
 			Plater.UpdateAllPlates()
 		end,
 		name = "OPTIONS_ENABLED",
-		desc = "Time left on buff or debuff.",
+		desc = L["OPTIONS_ENABLED_TIME_LEFT_DESC"],
 	},
 	
 	{
@@ -2523,8 +2535,8 @@ local debuff_options = {
 			Plater.RefreshAuras()
 			Plater.UpdateAllPlates()
 		end,
-		name = "Show Decimals",
-		desc = "Show decimals below 10s remaining time",
+		name = L["OPTIONS_SHOW_DECIMALS_NAME"],
+		desc = L["OPTIONS_SHOW_DECIMALS_DESC"],
 	},
 
 	{
@@ -2535,8 +2547,8 @@ local debuff_options = {
 			Plater.db.profile.disable_omnicc_on_auras = value
 			Plater.RefreshOmniCCGroup()
 		end,
-		name = "Hide OmniCC/TullaCC Timer",
-		desc = "OmniCC/TullaCC timers won't show in the aura.\n\n" .. ImportantText .. "require /reload when toggling this feature.",
+		name = L["OPTIONS_HIDE_CC_TIMER"],
+		desc = L["OPTIONS_HIDE_CC_DESC_FIRST"] .. ImportantText .. L["OPTIONS_HIDE_CC_DESC_SECOND"],
 	},
 	
 	{
@@ -2558,7 +2570,7 @@ local debuff_options = {
 		max = 40,
 		step = 1,
 		name = "OPTIONS_SIZE",
-		desc = "Size",
+		desc = "OPTIONS_SIZE",
 	},
 	
 	--text outline options
@@ -2601,14 +2613,14 @@ local debuff_options = {
 			Plater.UpdateAllPlates()
 		end,
 		name = "OPTIONS_COLOR",
-		desc = "Color",
+		desc = "OPTIONS_COLOR",
 	},
 	{
 		type = "select",
 		get = function() return Plater.db.profile.aura_timer_text_anchor.side end,
 		values = function() return build_anchor_side_table (nil, "aura_timer_text_anchor") end,
 		name = "OPTIONS_ANCHOR",
-		desc = "Which side of the buff icon the timer should attach to.",
+		desc = L["OPTIONS_ANCHOR_DESC_THREE"],
 	},
 	{
 		type = "range",
@@ -2641,13 +2653,13 @@ local debuff_options = {
 	},
 	
 	{type = "blank"},
-	{type = "label", get = function() return "Swipe Animation:" end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
+	{type = "label", get = function() return L["OPTIONS_SWIPE_ANIMATION"] end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
 	{
 		type = "select",
 		get = function() return Plater.db.profile.aura_cooldown_edge_texture end,
 		values = function() return cooldown_edge_texture_selected_options end,
-		name = "Swipe Texture",
-		desc = "Texture in the form of a line which rotates within the aura icon following the aura remaining time.",
+		name = L["OPTIONS_SWIPE_TEXTURE_NAME"],
+		desc = L["OPTIONS_SWIPE_TEXTURE_DESC"],
 	},
 	{
 		type = "toggle",
@@ -2658,8 +2670,8 @@ local debuff_options = {
 			Plater.IncreaseRefreshID()
 			Plater.UpdateAllPlates()
 		end,
-		name = "Show Swipe Closure Texture",
-		desc = "Show a layer with a dark texture above the icon. This layer is applied or removed as the swipe moves.",
+		name = L["OPTIONS_SWIPE_CLOSEURE_TEXTURE_NAME"],
+		desc = L["OPTIONS_SWIPE_CLOSEURE_TEXTURE_DESC"],
 	},
 	{
 		type = "toggle",
@@ -2670,9 +2682,16 @@ local debuff_options = {
 			Plater.IncreaseRefreshID()
 			Plater.UpdateAllPlates()
 		end,
-		name = "Swipe Closure Inverted",
-		desc = "If enabled the swipe closure texture is applied as the swipe moves instead.",
+		name = L["OPTIONS_SWIPE_CLOSEURE_INVERTED_NAME"],
+		desc = L["OPTIONS_SWIPE_CLOSEURE_INVERTED_DESC"],
 	},
+	
+	-- TODO: I do wonder if it's worth re ajusting these to fit with the rest of the blocks of options in terms of layout in the code.
+	{type = "breakline"},
+
+	{type = "label", get = function() return "Automatic Aura Tracking:" end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
+
+	{
 }
 
 if IS_WOW_PROJECT_CLASSIC_ERA then
@@ -2681,6 +2700,22 @@ if IS_WOW_PROJECT_CLASSIC_ERA then
 		boxfirst = true,
 		get = function() return Plater.db.profile.auras_experimental_update_classic_era end,
 		set = function (self, fixedparam, value) 
+			Plater.db.profile.aura_show_aura_by_the_player = value
+			Plater.RefreshDBUpvalues()
+			Plater.UpdateAllPlates()
+		end,
+		name = L["OPTIONS_AURAS_ON_YOU"],
+		desc = L["OPTIONS_AURAS_ON_YOU"],
+	},
+	
+	{
+		type = "toggle",
+		boxfirst = true,
+		get = function() return Plater.db.profile.aura_show_aura_by_other_players end,
+		set = function (self, fixedparam, value) 
+			Plater.db.profile.aura_show_aura_by_other_players = value
+			Plater.RefreshDBUpvalues()
+			Plater.UpdateAllPlates()
 			Plater.db.profile.auras_experimental_update_classic_era = value
 			Plater.RefreshAuraCache()
 		end,
@@ -2710,6 +2745,7 @@ _G.C_Timer.After(0.850, function() --~delay
 	--DF:DebugVisibility(canvasFrame:GetScrollChild())
 end)
 
+-- TODO: Do these strings need translation?
 auraOptionsFrame.AuraTesting = {
 	DEBUFF = {
 		{
@@ -2784,13 +2820,13 @@ Plater.CreateAuraTesting()
 	end
 	
 	local debuff_panel_texts = {
-		BUFFS_AVAILABLE = "Click to add buffs to blacklist",
-		DEBUFFS_AVAILABLE = "Click to add debuffs to blacklist",
-		BUFFS_IGNORED = "BUFFS on the BLACKLIST (filtered out)",
-		DEBUFFS_IGNORED = "DEBUFFS on the BLACKLIST (filtered out)",
-		BUFFS_TRACKED = "Additional BUFFS to TRACK",
-		DEBUFFS_TRACKED = "Additional DEBUFFS to TRACK",
-		MANUAL_DESC = "Auras are being tracked manually, the addon only check for auras you entered below.\nShow debuffs only casted by you, buffs from any source.\nYou may use the 'Buff Special' tab to add debuffs from any source.",
+		BUFFS_AVAILABLE = L["OPTIONS_BUFFS_AVALABLE"],
+		DEBUFFS_AVAILABLE = L["OPTIONS_DEBUFFS_AVALABLE"],
+		BUFFS_IGNORED = L["OPTIONS_BUFFS_IGNORED"],
+		DEBUFFS_IGNORED = L["OPTIONS_DEBUFFS_IGNORED"],
+		BUFFS_TRACKED = L["OPTIONS_BUFFS_TRACKED"],
+		DEBUFFS_TRACKED = L["OPTIONS_DEBUFFS_TRACKED"],
+		MANUAL_DESC = L["OPTIONS_AURAS_TRACKING_DESC"],
 	}
 	
 	auraFilterFrame:SetSize (f:GetWidth(), f:GetHeight() + startY)
@@ -2867,16 +2903,16 @@ Plater.CreateAuraTesting()
 	
 		--header
 		local headerTable = {
-			{text = "Icon", width = 32},
-			{text = "Spell ID", width = 74},
-			{text = "Spell Name", width = 162},
-			{text = "Source", width = 130},
-			{text = "Spell Type", width = 70},
-			{text = "Add to Tracklist", width = 100},
-			{text = "Add to Blacklist", width = 100},
-			{text = "Add to Special Auras", width = 120},
-			{text = "Add to Script", width = 120},
-			{text = "From Last Combat", width = 120}, --, icon = _G.WeakAuras and [[Interface\AddOns\WeakAuras\Media\Textures\icon]] or ""
+			{text = L["OPTIONS_HEADER_TABLE_ICON"], width = 32},
+			{text = L["OPTIONS_HEADER_TABLE_SPELL_ID"], width = 74},
+			{text = L["OPTIONS_HEADER_TABLE_SPELL_NAME"], width = 162},
+			{text = L["OPTIONS_HEADER_TABLE_SOURCE"], width = 130},
+			{text = L["OPTIONS_HEADER_TABLE_SPELL_TYPE"], width = 70},
+			{text = L["OPTIONS_HEADER_TABLE_ADD_TO_TRACKLIST"], width = 100},
+			{text = L["OPTIONS_HEADER_TABLE_ADD_TO_BLACKLIST"], width = 100},
+			{text = L["OPTIONS_HEADER_TABLE_ADD_TO_SPECIAL_AURAS"], width = 120},
+			{text = L["OPTIONS_HEADER_TABLE_ADD_TO_SCRIPT"], width = 120},
+			{text = L["OPTIONS_HEADER_TABLE_FROM_LAST_COMBAT"]	, width = 120}, --, icon = _G.WeakAuras and [[Interface\AddOns\WeakAuras\Media\Textures\icon]] or ""
 		}
 		local headerOptions = {
 			padding = 2,
@@ -2926,14 +2962,14 @@ Plater.CreateAuraTesting()
 			if (self.AuraType == "BUFF") then
 				if (Plater.db.profile.aura_tracker.track_method == 0x1) then
 					Plater.db.profile.aura_tracker.buff_tracked [self.SpellID] = true
-					Plater:Msg ("Aura added to buff tracking.")
+					Plater:Msg (L["OPTIONS_ARURA_TRACKING_BUFF_ADDED"])
 					
 				elseif (Plater.db.profile.aura_tracker.track_method == 0x2) then
 					local added = DF.table.addunique (Plater.db.profile.aura_tracker.buff, self.SpellID)
 					if (added) then
-						Plater:Msg ("Aura added to manual buff tracking.")
+						Plater:Msg (L["OPTIONS_ARURA_TRACKING_BUFF_ADDED_MANUAL"])
 					else
-						Plater:Msg ("Aura not added: already on track.")
+						Plater:Msg (L["OPTIONS_ARURA_TRACKING_ERROR_ALREADY_TRACKING"])
 					end
 					
 				end
@@ -2941,33 +2977,33 @@ Plater.CreateAuraTesting()
 			elseif (self.AuraType == "DEBUFF") then
 				if (Plater.db.profile.aura_tracker.track_method == 0x1) then
 					Plater.db.profile.aura_tracker.debuff_tracked [self.SpellID] = true
-					Plater:Msg ("Aura added to debuff tracking.")
+					Plater:Msg (L["OPTIONS_ARURA_TRACKING_DEBUFF_ADDED"])
 					
 				elseif (Plater.db.profile.aura_tracker.track_method == 0x2) then
 					local added = DF.table.addunique (Plater.db.profile.aura_tracker.debuff, self.SpellID)
 					if (added) then
-						Plater:Msg ("Aura added to manual debuff tracking.")
+						Plater:Msg ("OPTIONS_ARURA_TRACKING_DEBUFF_ADDED_MANUAL"])
 					else
-						Plater:Msg ("Aura not added: already on track.")
+						Plater:Msg (L["OPTIONS_ARURA_TRACKING_ERROR_ALREADY_TRACKING"])
 					end
 					
 				end
 			end
 		end
-		
+		-- HERE
 		local line_add_ignorelist = function (self)
 			self = self:GetCapsule()
 			
 			if (self.AuraType == "BUFF") then
 				if (Plater.db.profile.aura_tracker.track_method == 0x1) then
 					Plater.db.profile.aura_tracker.buff_banned [self.SpellID] = true
-					Plater:Msg ("Aura added to buff blacklist.")
+					Plater:Msg (L["OPTIONS_BUFF_ADDED_TO_BLACKLIST"])
 				end
 			
 			elseif (self.AuraType == "DEBUFF") then
 				if (Plater.db.profile.aura_tracker.track_method == 0x1) then
 					Plater.db.profile.aura_tracker.debuff_banned [self.SpellID] = true
-					Plater:Msg ("Aura added to debuff blacklist.")
+					Plater:Msg (L["OPTIONS_DEBUFF_ADDED_TO_BLACKLIST"])
 				end
 			end
 		end
@@ -2977,9 +3013,9 @@ Plater.CreateAuraTesting()
 			
 			local added = DF.table.addunique (Plater.db.profile.extra_icon_auras, self.SpellID)
 			if (added) then
-				Plater:Msg ("Aura added to the special aura container.")
+				Plater:Msg (L["OPTIONS_AURA_ADDED_TO_CONTAINER"])
 			else
-				Plater:Msg ("Aura not added: already on the special container.")
+				Plater:Msg (L["OPTIONS_ARURA_TRACKING_ERROR_ALREADY_TRACKING"])
 			end
 		end
 		
@@ -2994,9 +3030,9 @@ Plater.CreateAuraTesting()
 					if (added) then
 						--reload all scripts
 						Plater.WipeAndRecompileAllScripts ("script")
-						Plater:Msg ("Trigger added to script.")
+						Plater:Msg (L["OPTIONS_TRIGGER_ADDED_TO_SCRIPT"])
 					else
-						Plater:Msg ("Script already have this trigger.")
+						Plater:Msg (L["OPTIONS_SCRIPT_HAS_TRIGGER"])
 					end
 					
 					--refresh and select no option
@@ -3036,7 +3072,7 @@ Plater.CreateAuraTesting()
 				Details:OpenAuraPanel (self.SpellID, spellName, spellIcon, encounterID, self.AuraType == "BUFF" and 5 or self.AuraType == "DEBUFF" and 1 or self.IsCast and 7 or 2, 1)
 				PlaterOptionsPanelFrame:Hide()
 			else
-				Plater:Msg ("Details! Damage Meter not found, install it from the Twitch App!")
+				Plater:Msg (L["OPTIONS_DETAILS_NOT_FOUND"])
 			end
 		end
 	
@@ -3318,7 +3354,7 @@ Plater.CreateAuraTesting()
 					DetailsForgePanel.SelectModule (_, _, 1)
 				end
 			else
-				Plater:Msg ("Details! Damage Meter is required and isn't installed, get it on Twitch App!")
+				Plater:Msg (L["OPTIONS_DETAILS_REQUIRED"])
 			end
 		end
 		
@@ -3353,7 +3389,7 @@ Plater.CreateAuraTesting()
 			aura_search_label:SetPoint ("right", aura_search_textentry, "left", -2, 0)
 		
 		--create the description
-		auraLastEventFrame.TitleDescText = Plater:CreateLabel (auraLastEventFrame, "Quick way to manage auras from a recent raid boss or dungeon run", 10, "silver")
+		auraLastEventFrame.TitleDescText = Plater:CreateLabel (auraLastEventFrame, L["OPTIONS_QUICK_MANAGE_AURAS"], 10, "silver")
 		auraLastEventFrame.TitleDescText:SetPoint ("bottomleft", spells_scroll, "topleft", 0, 26)
 		
 	end
@@ -3572,7 +3608,7 @@ Plater.CreateAuraTesting()
 		DF:SetFontSize (new_buff_string, 12)
 		
 		local new_buff_entry = DF:CreateTextEntry (specialAuraFrame, function()end, 200, 20, "NewSpecialAuraTextBox", _, _, options_dropdown_template)
-		new_buff_entry.tooltip = "Enter the aura name using lower case letters or spell-IDs.\n\nYou can add several spells at once using |cFFFFFF00;|r to separate each spell name."
+		new_buff_entry.tooltip = L["OPTIONS_QUICK_MANAGE_AURAS"]
 		new_buff_entry:SetJustifyH ("left")
 		
 		new_buff_entry:SetHook ("OnEditFocusGained", function (self, capsule)
@@ -3622,14 +3658,14 @@ Plater.CreateAuraTesting()
 						if (spellID) then
 							tinsert (Plater.db.profile.extra_icon_auras, spellID)
 						else
-							print ("spellId not found for spell:", spellName)
+							print (L["OPTIONS_ERROR_NO_SPELL_ID_FOUND"], spellName)
 						end
 					end
 				else
 					--get the spellId
 					local spellID = new_buff_entry.GetSpellIDFromString (text)
 					if (not spellID) then
-						print ("spellID for spell ", text, "not found")
+						print (L["OPTIONS_SPELL_FOUND"], text, "not found")
 						return
 					end
 				
@@ -3645,7 +3681,7 @@ Plater.CreateAuraTesting()
 		new_buff_entry:SetPoint ("topleft",  special_auras_added, "topright", 40, 0)
 		new_buff_string:SetPoint ("bottomleft", new_buff_entry, "topleft", 0, 2)
 		add_buff_button:SetPoint ("topleft", new_buff_entry, "bottomleft", 0, -2)
-		add_buff_button.tooltip = "Add the aura to be tracked."
+		add_buff_button.tooltip = L["OPTIONS_ADD_BUFF_BUTTONS_DESC"]
 		
 		--
 		especial_aura_settings = {
@@ -3658,7 +3694,7 @@ Plater.CreateAuraTesting()
 			{type = "blank"},
 			{type = "blank"},
 			{type = "blank"},
-			{type = "label", get = function() return "Icon Settings:" end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
+			{type = "label", get = function() return L["OPTIONS_ICON_SETTINGS"] end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
 			--anchor
 			{
 				type = "select",
@@ -3680,7 +3716,7 @@ Plater.CreateAuraTesting()
 				step = 1,
 				usedecimals = true,
 				name = "OPTIONS_XOFFSET",
-				desc = "Slightly move horizontally.",
+				desc = L["OPTIONS_XOFFSET_DESC_TWO"],
 			},
 			--y offset
 			{
@@ -3695,7 +3731,7 @@ Plater.CreateAuraTesting()
 				step = 1,
 				usedecimals = true,
 				name = "OPTIONS_YOFFSET",
-				desc = "Slightly move vertically.",
+				desc = L["OPTIONS_YOFFSET_DESC_TWO"],
 			},
 			--width
 			{
@@ -3733,8 +3769,8 @@ Plater.CreateAuraTesting()
 					Plater.db.profile.extra_icon_wide_icon = value
 					Plater.UpdateAllPlates()
 				end,
-				name = "Wide Icons",
-				desc = "Wide Icons",
+				name = L["OPTIONS_WIDE_ICONS"],
+				desc = L["OPTIONS_WIDE_ICONS"],
 			},
 			--use blizzard border colors
 			{
@@ -3744,8 +3780,8 @@ Plater.CreateAuraTesting()
 					Plater.db.profile.extra_icon_use_blizzard_border_color = value
 					Plater.UpdateAllPlates()
 				end,
-				name = "Use Blizzard border colors",
-				desc = "Use Blizzard border colors if enabled or the below defined default border color if disabled.",
+				name = L["OPTIONS_USE_BLIZZ_BORDER_COLORS_NAME"],
+				desc = L["OPTIONS_USE_BLIZZ_BORDER_COLORS_DESC"],
 			},
 			--border color
 			{
@@ -3759,8 +3795,8 @@ Plater.CreateAuraTesting()
 					color[1], color[2], color[3], color[4] = r, g, b, a
 					Plater.UpdateAllPlates()
 				end,
-				name = "Default Border Color",
-				desc = "Default Border Color",
+				name = L["OPTIONS_USE_DEFAULT_BORDER_COLOR"],
+				desc = L["OPTIONS_USE_DEFAULT_BORDER_COLOR"],
 			},
 			{
 				type = "select",
@@ -3776,8 +3812,8 @@ Plater.CreateAuraTesting()
 					Plater.db.profile.extra_icon_show_swipe = value
 					Plater.UpdateAllPlates()
 				end,
-				name = "Show Swipe Closure Texture",
-				desc = "If enabled the swipe closure texture is applied as the swipe moves instead.",
+				name = L["OPTIONS_SWIPE_TEXTURE_NAME"],
+				desc = L["OPTIONS_SWIPE_TEXTURE_DESC_TWO"],
 			},
 			{
 				type = "toggle",
@@ -3786,8 +3822,8 @@ Plater.CreateAuraTesting()
 					Plater.db.profile.extra_icon_cooldown_reverse = value
 					Plater.UpdateAllPlates()
 				end,
-				name = "Swipe Closure Inverted",
-				desc = "If enabled the swipe closure texture is applied as the swipe moves instead.",
+				name = L["OPTIONS_SWIPE_CLOSEURE_INVERTED_NAME"],
+				desc = L["OPTIONS_SWIPE_CLOSEURE_INVERTED_DESC"],
 			},
 			
 			{type = "breakline"},
@@ -3800,8 +3836,8 @@ Plater.CreateAuraTesting()
 					Plater.db.profile.extra_icon_show_timer = value
 					Plater.UpdateAllPlates()
 				end,
-				name = "Show Timer",
-				desc = "Show Timer",
+				name = L["OPTIONS_SHOW_TIMER"],
+				desc = L["OPTIONS_SHOW_TIMER"],
 			},
 			{
 				type = "toggle",
@@ -3810,8 +3846,8 @@ Plater.CreateAuraTesting()
 					Plater.db.profile.extra_icon_timer_decimals = value
 					Plater.UpdateAllPlates()
 				end,
-				name = "Show Decimals",
-				desc = "Show decimals below 10s remaining time",
+				name = L["OPTIONS_SHOW_DECIMALS_NAME"],
+				desc = L["OPTIONS_SHOW_DECIMALS_DESC_TWO"],
 			},
 			{
 				type = "select",
@@ -3850,8 +3886,8 @@ Plater.CreateAuraTesting()
 					Plater.db.profile.extra_icon_caster_name = value
 					Plater.UpdateAllPlates()
 				end,
-				name = "Show Caster Name",
-				desc = "Show Caster Name (if player)",
+				name = L["OPTIONS_SHOW_CASTER_NAME"],
+				desc = L["OPTIONS_SHOW_CASTER_NAME"] .. L["OPTIONS_CASTER_NAME_IF_PLAYER"],
 			},
 			{
 				type = "select",
@@ -3890,8 +3926,8 @@ Plater.CreateAuraTesting()
 					Plater.db.profile.extra_icon_show_stacks = value
 					Plater.UpdateAllPlates()
 				end,
-				name = "Show Stacks",
-				desc = "Show Stacks",
+				name = L["OPTIONS_SHOW_STACKS"],
+				desc = L["OPTIONS_SHOW_STACKS"],
 			},
 						{
 				type = "select",
@@ -3935,7 +3971,7 @@ Plater.CreateAuraTesting()
 					Plater.RefreshDBUpvalues()
 					Plater.UpdateAllPlates()
 				end,
-				name = "Crowd Control",
+				name = L["OPTIONS_CROWD_CONTROL"],
 				desc = "When the unit has a crowd control spell (such as Polymorph).",
 			},
 			--show purge icons
@@ -3947,7 +3983,7 @@ Plater.CreateAuraTesting()
 					Plater.RefreshDBUpvalues()
 					Plater.UpdateAllPlates()
 				end,
-				name = "Dispellable",
+				name = L["OPTIONS_DISPELLABLE"],
 				desc = "When the unit has an aura which can be dispellable or purge by you",
 			},
 			--show enrages
@@ -3959,7 +3995,7 @@ Plater.CreateAuraTesting()
 					Plater.RefreshDBUpvalues()
 					Plater.UpdateAllPlates()
 				end,
-				name = "Enrage",
+				name = L["OPTIONS_ENRAGE"],
 				desc = "When the unit has an enrage effect on it, show it.",
 			},
 			--show enrages
@@ -3971,7 +4007,7 @@ Plater.CreateAuraTesting()
 					Plater.RefreshDBUpvalues()
 					Plater.UpdateAllPlates()
 				end,
-				name = "Magic",
+				name =  L["OPTIONS_MAGIC"],
 				desc = "When the unit has a magic buff on it, show it.",
 			},
 			--show offensive CDs
@@ -3983,8 +4019,8 @@ Plater.CreateAuraTesting()
 					Plater.RefreshDBUpvalues()
 					Plater.UpdateAllPlates()
 				end,
-				name = "Offensive player CDs",
-				desc = "When the unit has an offensive effect on it, show it.",
+				name = L["OPTIONS_MAJOUR"] .. L["OPTIONS_OFFENSIVE"] .. L["OPTIONS_COOLODWN"],
+				desc = L["OPTIONS_SHOW_CDS_DESC_START"] .. L["OPTIONS_MAJOUR"] .. L["OPTIONS_OFFENSIVE"] .. L["OPTIONS_SHOW_CDS_DESC_END"],
 			},
 			--show defensive CDs
 			{
@@ -3995,13 +4031,13 @@ Plater.CreateAuraTesting()
 					Plater.RefreshDBUpvalues()
 					Plater.UpdateAllPlates()
 				end,
-				name = "Defensive player CDs",
-				desc = "When the unit has a defensive effect on it, show it.",
+				name = L["OPTIONS_MAJOUR"] .. L["OPTIONS_DEFENSIVE"] .. L["OPTIONS_COOLODWN"],
+				desc = L["OPTIONS_SHOW_CDS_DESC_START"] .. L["OPTIONS_MAJOUR"] .. L["OPTIONS_DEFENSIVE"] .. L["OPTIONS_SHOW_CDS_DESC_END"],
 			},
 			
 			{type = "breakline"},
 			
-			{type = "label", get = function() return "Aura Border Colors:" end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
+			{type = "label", get = function() return L["OPTIONS_AURA_BORDER_COLORS"] end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
 			--cc border color
 			{
 				type = "color",
@@ -4014,8 +4050,8 @@ Plater.CreateAuraTesting()
 					color[1], color[2], color[3], color[4] = r, g, b, a
 					Plater.UpdateAllPlates()
 				end,
-				name = "Crowd Control Border Color",
-				desc = "Crowd Control Border Color",
+				name = L["OPTIONS_CROWD_CONTROL"] .. L["OPTIONS_BORDER_COLOR"],
+				desc = L["OPTIONS_CROWD_CONTROL"] .. L["OPTIONS_BORDER_COLOR"],
 			},
 			--purge border color
 			{
@@ -4029,8 +4065,8 @@ Plater.CreateAuraTesting()
 					color[1], color[2], color[3], color[4] = r, g, b, a
 					Plater.UpdateAllPlates()
 				end,
-				name = "Dispellable Border Color",
-				desc = "Dispellable Border Color",
+				name = L["OPTIONS_DISPELLABLE"] .. L["OPTIONS_BORDER_COLOR"],
+				desc = L["OPTIONS_DISPELLABLE"] .. L["OPTIONS_BORDER_COLOR"],
 			},
 			--enrage border color
 			{
@@ -4044,8 +4080,8 @@ Plater.CreateAuraTesting()
 					color[1], color[2], color[3], color[4] = r, g, b, a
 					Plater.UpdateAllPlates()
 				end,
-				name = "Enrage Border Color",
-				desc = "Enrage Border Color",
+				name = L["OPTIONS_ENRAGE"] .. L["OPTIONS_BORDER_COLOR"],
+				desc = L["OPTIONS_ENRAGE"] .. L["OPTIONS_BORDER_COLOR"],
 			},
 			--offensive border color
 			{
@@ -4059,8 +4095,8 @@ Plater.CreateAuraTesting()
 					color[1], color[2], color[3], color[4] = r, g, b, a
 					Plater.UpdateAllPlates()
 				end,
-				name = "Offensive Border Color",
-				desc = "Offensive Border Color",
+				name = L["OPTIONS_MAJOUR"] .. L["OPTIONS_OFFENSIVE"] .. L["OPTIONS_BORDER_COLOR"],
+				desc = L["OPTIONS_MAJOUR"] .. L["OPTIONS_OFFENSIVE"] .. L["OPTIONS_BORDER_COLOR"],
 			},
 			--defensive border color
 			{
@@ -4074,13 +4110,13 @@ Plater.CreateAuraTesting()
 					color[1], color[2], color[3], color[4] = r, g, b, a
 					Plater.UpdateAllPlates()
 				end,
-				name = "Defensive Border Color",
-				desc = "Defensive Border Color",
+				name = L["OPTIONS_MAJOUR"] .. L["OPTIONS_DEFENSIVE"] .. L["OPTIONS_BORDER_COLOR"],
+				desc = L["OPTIONS_MAJOUR"] .. L["OPTIONS_DEFENSIVE"] .. L["OPTIONS_BORDER_COLOR"],
 			},
 		
 			{type = "blank"},
 			--{type = "blank"},
-			{type = "label", get = function() return "DBM / BigWigs Icon-Support:" end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
+			{type = "label", get = function() return L["OPTIONS_BOSS_MODS_SUPPORT"] end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
 
 			{
 				type = "toggle",
@@ -4090,7 +4126,7 @@ Plater.CreateAuraTesting()
 					Plater.UpdateAllPlates()
 				end,
 				name = "OPTIONS_ENABLED",
-				desc = "Enable the boss mod icon support for BigWigs and DBM.",
+				desc = L["OPTIONS_BOSS_MODS_SUPPORT_DESC"],
 			},
 			
 			{
@@ -4100,13 +4136,13 @@ Plater.CreateAuraTesting()
 					Plater.db.profile.bossmod_support_bars_enabled = value
 					Plater.UpdateAllPlates()
 				end,
-				name = "DBM CD-Bar Icons enabled",
-				desc = "Enable the boss mod bar support for DBM, to show timer bars as icons on the nameplates.",
+				name = L["OPTIONS_DBM_CD-BAR_ICONS_ENABLED_NAME"],
+				desc = L["OPTIONS_DBM_CD-BAR_ICONS_ENABLED_DESC"],
 			},
 			
 			{type = "blank"},
 			
-			{type = "label", get = function() return "Icon Settings:" end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
+			{type = "label", get = function() return L["OPTIONS_ICON_SETTINGS"] end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
 			
 			--width
 			{
@@ -4143,7 +4179,7 @@ Plater.CreateAuraTesting()
 			get = function() return Plater.db.profile.bossmod_icons_anchor.side end,
 			values = function() return build_anchor_side_table (nil, "bossmod_icons_anchor") end,
 			name = "OPTIONS_ANCHOR",
-			desc = "Which side of the nameplate the icons should attach to.",
+			desc = L["OPTIONS_ANCHOR_DESC_FOUR"],
 			},
 			--x offset
 			{
@@ -4178,7 +4214,7 @@ Plater.CreateAuraTesting()
 			
 			{type = "blank"},
 			
-			{type = "label", get = function() return "Cooldown Text:" end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
+			{type = "label", get = function() return (L["OPTIONS_COOLODWN"] .. L["OPTIONS_TEXT"] .. ":") end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
 			{
 				type = "toggle",
 				get = function() return Plater.db.profile.bossmod_cooldown_text_enabled end,
@@ -4187,7 +4223,7 @@ Plater.CreateAuraTesting()
 					Plater.UpdateAllPlates()
 				end,
 				name = "OPTIONS_ENABLED",
-				desc = "Enable Cooldown Text.",
+				desc = L["OPTIONS_ENABLE_COOLDOWN_TEXT"],
 			},
 			--cd text size
 			{
@@ -4202,11 +4238,11 @@ Plater.CreateAuraTesting()
 				max = 32,
 				step = 1,
 				name = "OPTIONS_SIZE",
-				desc = "Size",
+				desc = L["OPTIONS_SIZE"],
 			},
 		}
 		
-		auraSpecialFrame.ExampleImageDesc = DF:CreateLabel (auraSpecialFrame, "Special auras look like this:", 14)
+		auraSpecialFrame.ExampleImageDesc = DF:CreateLabel (auraSpecialFrame, L["OPTIONS_SPECIAL_AURAS_EXAMPLE"], 14)
 		auraSpecialFrame.ExampleImageDesc:SetPoint (330, -235)
 		auraSpecialFrame.ExampleImage = DF:CreateImage (auraSpecialFrame, [[Interface\AddOns\Plater\images\extra_icon_example]], 256*0.8, 128*0.8)
 		auraSpecialFrame.ExampleImage:SetPoint (330, -249)
@@ -4237,7 +4273,7 @@ Plater.CreateAuraTesting()
 		end)
 		
 		--create the description
-		auraSpecialFrame.TitleDescText = Plater:CreateLabel (auraSpecialFrame, "Track auras adding them to a special buff frame separated from the main buff line. Use it to emphasize important auras from raid bosses or mythic dungeons.", 10, "silver")
+		auraSpecialFrame.TitleDescText = Plater:CreateLabel (auraSpecialFrame, L["OPTIONS_SPECIAL_AURAS_DESC"], 10, "silver")
 		auraSpecialFrame.TitleDescText:SetPoint ("bottomleft", special_auras_added, "topleft", 0, 26)
 	end
 
@@ -4279,7 +4315,7 @@ do
 	
 	options_personal = {
 
-		{type = "label", get = function() return "General Settings:" end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
+		{type = "label", get = function() return L["GENERAL_SETTINGS"] end, text_template = DF:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
 		
 		{
 			type = "select",

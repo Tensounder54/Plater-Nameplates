@@ -3,6 +3,13 @@ do
     local languageTable = DetailsFramework.Language.RegisterLanguage(addonId, "arAR", true, "العربية", [[Interface\AddOns\Plater\fonts\NotoNaskhArabic-Regular.ttf]])
     local L = languageTable
 
+    --on curseforge
+
+    -- These strings occur in the main Plater file.
+    L["ERROR"] = "خطأ"
+
+    -- These strings occur in the options file.
+
     L["OPTIONS_NAMEPLATE_HIDE_FRIENDLY_HEALTH_DESC"] = [["عند القيام بالتحديات أو العمليات، إذا تم تمكين الصحون الخاصة بالأصدقاء فسيتم عرض اسم اللاعب فقط.
     إذا تم تعطيل أي وحدة من وحدات Plater، فسوف يؤثر هذا على هذه الصحون أيضًا.
 
